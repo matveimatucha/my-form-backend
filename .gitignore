@@ -1,2 +1,7 @@
 node_modules/
+.env
 credentials.json
+base64_credentials.txt
+temp.txt
+.DS_Store
+*.log
