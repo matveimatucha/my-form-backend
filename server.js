@@ -31,7 +31,7 @@ async function authorize() {
   return auth.getClient();
 }
 
-// Функция записи в Sheets (обновлено для 7 столбцов: Дата + 6 полей)
+// Функция записи в Sheets (8 столбцов: Дата + 7 полей)
 async function appendToSheet(auth, data) {
   if (!SHEET_ID) {
     throw new Error('SHEET_ID not set in env');
@@ -45,30 +45,31 @@ async function appendToSheet(auth, data) {
       data.patronymic || '', // D: Отчество
       data.vkLink || '', // E: Ссылка на ВК
       data.phone || '', // F: Телефон
-      data.faculty || '' // G: Факультет
+      data.email || '', // G: Email
+      data.faculty || '' // H: Факультет
     ]
   ];
   await sheets.spreadsheets.values.append({
     spreadsheetId: SHEET_ID,
-    range: 'Лист1!A:G', // Обновлено для 7 столбцов
+    range: 'Лист1!A:H', // 8 столбцов
     valueInputOption: 'RAW',
     resource: { values },
   });
 }
 
-// Эндпоинт для формы (валидация на все поля)
+// Эндпоинт для формы (валидация на все 7 полей)
 app.post('/submit', async (req, res) => {
   try {
     const auth = await authorize();
     const body = req.body || {};
-    const { surname, name, patronymic, vkLink, phone, faculty } = body;
+    const { surname, name, patronymic, vkLink, phone, email, faculty } = body;
     
     // Валидация (все поля обязательны)
-    if (!surname || !name || !patronymic || !vkLink || !phone || !faculty) {
+    if (!surname || !name || !patronymic || !vkLink || !phone || !email || !faculty) {
       return res.status(400).json({ error: 'Все поля обязательны' });
     }
 
-    await appendToSheet(auth, { surname, name, patronymic, vkLink, phone, faculty });
+    await appendToSheet(auth, { surname, name, patronymic, vkLink, phone, email, faculty });
     res.json({ success: true, message: 'Данные отправлены!' });
   } catch (error) {
     console.error('Error:', error);
